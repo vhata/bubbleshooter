@@ -24,7 +24,7 @@ In this game, players shoot colored bubbles to match and pop groups of three or 
 ## Development Progress
 - [x] Basic project setup
 - [x] Game window and basic rendering
-- [ ] Bubble class implementation
+- [x] Bubble class implementation
 - [ ] Shooter mechanics
 - [ ] Collision detection
 - [ ] Bubble matching and popping

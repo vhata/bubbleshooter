@@ -1,6 +1,7 @@
 import pygame
 import sys
 import math
+from bubble import Bubble, BubbleColor
 
 # Initialize Pygame
 pygame.init()
@@ -32,6 +33,24 @@ class Game:
         # Calculate grid offset to center it
         self.grid_offset_x = (WINDOW_WIDTH - (GRID_COLS * GRID_SIZE)) // 2
         self.grid_offset_y = 20  # Small margin from top
+        
+        # Initialize grid with some test bubbles
+        self.bubbles = []
+        self.initialize_test_bubbles()
+
+    def initialize_test_bubbles(self):
+        # Add some test bubbles in the first few rows
+        for row in range(5):  # First 5 rows
+            for col in range(GRID_COLS):
+                # Calculate bubble position
+                x = self.grid_offset_x + col * GRID_SIZE
+                if row % 2 == 1:
+                    x += GRID_SIZE // 2
+                y = self.grid_offset_y + row * (GRID_SIZE - 10)
+                
+                # Create bubble with random color
+                bubble = Bubble(x + GRID_SIZE//2, y + GRID_SIZE//2)
+                self.bubbles.append(bubble)
 
     def draw_grid(self):
         # Draw the hexagonal grid
@@ -75,11 +94,16 @@ class Game:
                     self.running = False
 
     def update(self):
-        pass
+        # Update all bubbles
+        for bubble in self.bubbles:
+            bubble.update()
 
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
         self.draw_grid()
+        # Draw all bubbles
+        for bubble in self.bubbles:
+            bubble.draw(self.screen)
         self.draw_shooter_area()
         pygame.display.flip()
 
