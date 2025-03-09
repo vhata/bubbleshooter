@@ -2,6 +2,7 @@ import pygame
 import sys
 import math
 from bubble import Bubble, BubbleColor
+from shooter import Shooter
 
 # Initialize Pygame
 pygame.init()
@@ -37,6 +38,11 @@ class Game:
         # Initialize grid with some test bubbles
         self.bubbles = []
         self.initialize_test_bubbles()
+        
+        # Initialize shooter
+        shooter_x = WINDOW_WIDTH // 2
+        shooter_y = WINDOW_HEIGHT - SHOOTER_HEIGHT // 2
+        self.shooter = Shooter(shooter_x, shooter_y, GRID_SIZE)
 
     def initialize_test_bubbles(self):
         # Add some test bubbles in the first few rows
@@ -92,11 +98,22 @@ class Game:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left click
+                    self.shooter.shoot()
 
     def update(self):
+        # Update shooter
+        mouse_pos = pygame.mouse.get_pos()
+        self.shooter.update(mouse_pos)
+        
         # Update all bubbles
         for bubble in self.bubbles:
             bubble.update()
+        
+        # Update shooter's current bubble if it's moving
+        if self.shooter.current_bubble:
+            self.shooter.current_bubble.update()
 
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
@@ -105,6 +122,8 @@ class Game:
         for bubble in self.bubbles:
             bubble.draw(self.screen)
         self.draw_shooter_area()
+        # Draw the shooter
+        self.shooter.draw(self.screen)
         pygame.display.flip()
 
     def run(self):
