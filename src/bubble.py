@@ -2,6 +2,7 @@ import pygame
 import math
 from enum import Enum
 import random
+from typing import Optional
 
 class BubbleColor(Enum):
     RED = (255, 50, 50)
@@ -17,15 +18,21 @@ class BubbleState(Enum):
     MOVING = "moving"    # Bubble is moving (shot from cannon)
 
 class Bubble:
-    def __init__(self, x, y, color=None, size=40):
+    def __init__(
+        self, 
+        x: float, 
+        y: float, 
+        color: Optional[BubbleColor] = None, 
+        size: int = 40
+    ) -> None:
         self.x = x
         self.y = y
         self.size = size
         self.color = color if color else random.choice(list(BubbleColor))
         self.state = BubbleState.FIXED
-        self.velocity = [0, 0]  # For moving bubbles [dx, dy]
+        self.velocity: list[float] = [0, 0]  # For moving bubbles [dx, dy]
         
-    def draw(self, screen):
+    def draw(self, screen: pygame.Surface) -> None:
         # Draw filled bubble
         points = self.calculate_hexagon()
         pygame.draw.polygon(screen, self.color.value, points)
@@ -33,19 +40,21 @@ class Bubble:
         darker_color = tuple(max(0, c - 50) for c in self.color.value)
         pygame.draw.polygon(screen, darker_color, points, 2)
 
-    def calculate_hexagon(self):
+    def calculate_hexagon(self) -> list[tuple[float, float]]:
         """Calculate the points for a hexagonal bubble"""
-        points = []
+        points: list[tuple[float, float]] = []
         # Size is slightly smaller than grid size for visual spacing
         radius = (self.size // 2) - 2
         for i in range(6):
             angle_deg = 60 * i - 30  # -30 to point hexagon upward
             angle_rad = math.pi / 180 * angle_deg
-            points.append((self.x + radius * math.cos(angle_rad),
-                         self.y + radius * math.sin(angle_rad)))
+            points.append((
+                self.x + radius * math.cos(angle_rad),
+                self.y + radius * math.sin(angle_rad)
+            ))
         return points
 
-    def update(self):
+    def update(self) -> None:
         """Update bubble position based on state and velocity"""
         if self.state == BubbleState.MOVING:
             self.x += self.velocity[0]
@@ -55,17 +64,17 @@ class Bubble:
             self.x += self.velocity[0]
             self.y += self.velocity[1]
 
-    def set_velocity(self, dx, dy):
+    def set_velocity(self, dx: float, dy: float) -> None:
         """Set the bubble's velocity for moving bubbles"""
         self.velocity = [dx, dy]
         self.state = BubbleState.MOVING
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the bubble's movement and fix it in place"""
         self.velocity = [0, 0]
         self.state = BubbleState.FIXED
 
-    def start_falling(self):
+    def start_falling(self) -> None:
         """Make the bubble start falling"""
         self.state = BubbleState.FALLING
         self.velocity = [random.uniform(-2, 2), 0]  # Add slight random horizontal movement 

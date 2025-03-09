@@ -1,6 +1,7 @@
 import pygame
 import sys
 import math
+from typing import Optional
 from bubble import Bubble, BubbleColor
 from shooter import Shooter
 
@@ -17,7 +18,7 @@ SHOOTER_HEIGHT = 100  # Height of the shooter area at bottom
 TITLE = "Bubble Shooter"
 FPS = 60
 
-# Colors
+# Colors (type: tuple[int, int, int])
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 BACKGROUND_COLOR = (30, 30, 50)  # Dark blue-ish
@@ -25,7 +26,7 @@ GRID_COLOR = (50, 50, 70)  # Slightly lighter than background
 SHOOTER_AREA_COLOR = (40, 40, 60)  # Medium blue-ish
 
 class Game:
-    def __init__(self):
+    def __init__(self) -> None:
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
@@ -36,7 +37,7 @@ class Game:
         self.grid_offset_y = 20  # Small margin from top
         
         # Initialize grid with some test bubbles
-        self.bubbles = []
+        self.bubbles: list[Bubble] = []
         self.initialize_test_bubbles()
         
         # Initialize shooter
@@ -44,7 +45,7 @@ class Game:
         shooter_y = WINDOW_HEIGHT - SHOOTER_HEIGHT // 2
         self.shooter = Shooter(shooter_x, shooter_y, GRID_SIZE)
 
-    def initialize_test_bubbles(self):
+    def initialize_test_bubbles(self) -> None:
         # Add some test bubbles in the first few rows
         for row in range(5):  # First 5 rows
             for col in range(GRID_COLS):
@@ -58,7 +59,7 @@ class Game:
                 bubble = Bubble(x + GRID_SIZE//2, y + GRID_SIZE//2)
                 self.bubbles.append(bubble)
 
-    def draw_grid(self):
+    def draw_grid(self) -> None:
         # Draw the hexagonal grid
         for row in range(GRID_ROWS):
             for col in range(GRID_COLS):
@@ -72,8 +73,8 @@ class Game:
                 points = self.calculate_hexagon(x + GRID_SIZE//2, y + GRID_SIZE//2, GRID_SIZE//2 - 2)
                 pygame.draw.polygon(self.screen, GRID_COLOR, points, 1)
 
-    def calculate_hexagon(self, x, y, size):
-        points = []
+    def calculate_hexagon(self, x: float, y: float, size: float) -> list[tuple[float, float]]:
+        points: list[tuple[float, float]] = []
         for i in range(6):
             angle_deg = 60 * i - 30  # -30 to point hexagon upward
             angle_rad = math.pi / 180 * angle_deg
@@ -81,7 +82,7 @@ class Game:
                          y + size * math.sin(angle_rad)))
         return points
 
-    def draw_shooter_area(self):
+    def draw_shooter_area(self) -> None:
         # Draw shooter area at bottom
         shooter_rect = pygame.Rect(0, WINDOW_HEIGHT - SHOOTER_HEIGHT,
                                  WINDOW_WIDTH, SHOOTER_HEIGHT)
@@ -91,7 +92,7 @@ class Game:
                         (0, WINDOW_HEIGHT - SHOOTER_HEIGHT),
                         (WINDOW_WIDTH, WINDOW_HEIGHT - SHOOTER_HEIGHT), 2)
 
-    def handle_events(self):
+    def handle_events(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -102,7 +103,7 @@ class Game:
                 if event.button == 1:  # Left click
                     self.shooter.shoot()
 
-    def update(self):
+    def update(self) -> None:
         # Update shooter
         mouse_pos = pygame.mouse.get_pos()
         self.shooter.update(mouse_pos)
@@ -115,7 +116,7 @@ class Game:
         if self.shooter.current_bubble:
             self.shooter.current_bubble.update()
 
-    def draw(self):
+    def draw(self) -> None:
         self.screen.fill(BACKGROUND_COLOR)
         self.draw_grid()
         # Draw all bubbles
@@ -126,7 +127,7 @@ class Game:
         self.shooter.draw(self.screen)
         pygame.display.flip()
 
-    def run(self):
+    def run(self) -> None:
         while self.running:
             self.handle_events()
             self.update()
