@@ -16,6 +16,23 @@ In this game, players shoot colored bubbles to match and pop groups of three or 
    python src/main.py
    ```
 
+## Development Setup
+1. Install development dependencies:
+   ```bash
+   pip install -r requirements-dev.txt
+   ```
+2. Install pre-commit hooks:
+   ```bash
+   pre-commit install
+   ```
+
+The project uses:
+- `black` for code formatting
+- `ruff` for fast linting
+- `mypy` for type checking
+
+These checks run automatically on commit.
+
 ## Controls
 - Mouse movement: Aim the shooter
 - Left click: Shoot bubble
