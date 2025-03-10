@@ -1,7 +1,9 @@
-import pygame
 import math
 from typing import Optional
-from bubble import Bubble, BubbleState
+
+import pygame
+from bubble import Bubble
+
 
 class Grid:
     def __init__(self, width: int, height: int, bubble_size: int = 40) -> None:
@@ -10,7 +12,9 @@ class Grid:
         self.bubble_size = bubble_size
         self.grid_height = height // bubble_size
         self.grid_width = width // bubble_size
-        self.bubbles: list[list[Optional[Bubble]]] = [[None] * self.grid_width for _ in range(self.grid_height)]
+        self.bubbles: list[list[Optional[Bubble]]] = [
+            [None] * self.grid_width for _ in range(self.grid_height)
+        ]
         self.init_grid()
 
     def init_grid(self) -> None:
@@ -44,20 +48,20 @@ class Grid:
     def add_bubble(self, bubble: Bubble) -> bool:
         """Add a bubble to the grid at the nearest valid position"""
         row, col = self.get_grid_pos(bubble.x, bubble.y)
-        
+
         # Ensure position is within grid bounds
         if not (0 <= row < self.grid_height and 0 <= col < self.grid_width):
             return False
-            
+
         # Adjust bubble position to grid
         x = col * self.bubble_size + (self.bubble_size // 2 if row % 2 else 0)
         y = row * (self.bubble_size - 10)
-        
+
         # Update bubble position and state
         bubble.x = x
         bubble.y = y
         bubble.stop()
-        
+
         # Add to grid
         self.bubbles[row][col] = bubble
         return True
@@ -66,37 +70,44 @@ class Grid:
         """Find all matching bubbles connected to the given position"""
         if not (0 <= row < self.grid_height and 0 <= col < self.grid_width):
             return set()
-            
+
         bubble = self.bubbles[row][col]
         if not bubble:
             return set()
-            
+
         color = bubble.color
         visited: set[tuple[int, int]] = set()
         matches: set[tuple[int, int]] = set()
-        
+
         def flood_fill(r: int, c: int) -> None:
             if not (0 <= r < self.grid_height and 0 <= c < self.grid_width):
                 return
             if (r, c) in visited:
                 return
             visited.add((r, c))
-            
+
             current = self.bubbles[r][c]
             if not current or current.color != color:
                 return
-                
+
             matches.add((r, c))
-            
+
             # Check all 6 directions
-            directions: list[tuple[int, int]] = [(-1, 0), (-1, 1), (0, 1), (1, 0), (1, -1), (0, -1)]
+            directions: list[tuple[int, int]] = [
+                (-1, 0),
+                (-1, 1),
+                (0, 1),
+                (1, 0),
+                (1, -1),
+                (0, -1),
+            ]
             # Adjust for even/odd rows
             if r % 2 == 0:
                 directions = [(-1, -1), (-1, 0), (0, 1), (1, -1), (1, 0), (0, -1)]
-                
+
             for dr, dc in directions:
                 flood_fill(r + dr, c + dc)
-        
+
         flood_fill(row, col)
         return matches
 
@@ -111,7 +122,7 @@ class Grid:
         """Find and remove bubbles that are not connected to the top"""
         # First, find all bubbles connected to the top row
         anchored: set[tuple[int, int]] = set()
-        
+
         def flood_fill_anchored(row: int, col: int) -> None:
             if not (0 <= row < self.grid_height and 0 <= col < self.grid_width):
                 return
@@ -119,23 +130,30 @@ class Grid:
                 return
             if not self.bubbles[row][col]:
                 return
-                
+
             anchored.add((row, col))
-            
+
             # Check all 6 directions
-            directions: list[tuple[int, int]] = [(-1, 0), (-1, 1), (0, 1), (1, 0), (1, -1), (0, -1)]
+            directions: list[tuple[int, int]] = [
+                (-1, 0),
+                (-1, 1),
+                (0, 1),
+                (1, 0),
+                (1, -1),
+                (0, -1),
+            ]
             # Adjust for even/odd rows
             if row % 2 == 0:
                 directions = [(-1, -1), (-1, 0), (0, 1), (1, -1), (1, 0), (0, -1)]
-                
+
             for dr, dc in directions:
                 flood_fill_anchored(row + dr, col + dc)
-        
+
         # Start from top row
         for col in range(self.grid_width):
             if self.bubbles[0][col]:
                 flood_fill_anchored(0, col)
-        
+
         # Remove unanchored bubbles
         for row in range(self.grid_height):
             for col in range(self.grid_width):
@@ -168,7 +186,9 @@ class Grid:
             return True, (row, max(0, min(col, self.grid_width - 1)))
 
         # Check collision with existing bubbles
-        radius = int((self.bubble_size - 4) / 2)  # Slightly smaller than bubble size for better gameplay
+        radius = int(
+            (self.bubble_size - 4) / 2
+        )  # Slightly smaller than bubble size for better gameplay
         for row in range(self.grid_height):
             for col in range(self.grid_width):
                 grid_bubble = self.bubbles[row][col]
@@ -177,14 +197,16 @@ class Grid:
                     dx = bubble.x - grid_bubble.x
                     dy = bubble.y - grid_bubble.y
                     distance = math.sqrt(dx * dx + dy * dy)
-                    
+
                     if distance < radius * 2:  # Collision detected
                         # Find the nearest empty grid position
                         return True, self._find_nearest_empty_position(row, col, bubble)
-        
+
         return False, None
 
-    def _find_nearest_empty_position(self, row: int, col: int, bubble: Bubble) -> tuple[int, int]:
+    def _find_nearest_empty_position(
+        self, row: int, col: int, bubble: Bubble
+    ) -> tuple[int, int]:
         """Find the nearest empty grid position to place a bubble after collision."""
         # Check all six adjacent positions
         directions = [(-1, 0), (-1, 1), (0, 1), (1, 0), (1, -1), (0, -1)]
@@ -192,30 +214,32 @@ class Grid:
             directions = [(-1, -1), (-1, 0), (0, 1), (1, -1), (1, 0), (0, -1)]
 
         # Find the closest empty position
-        min_distance = float('inf')
+        min_distance = float("inf")
         best_position = (row, col)  # Default to current position if no empty spots
 
         for dr, dc in directions:
             new_row = row + dr
             new_col = col + dc
-            
-            if (0 <= new_row < self.grid_height and 
-                0 <= new_col < self.grid_width and 
-                self.bubbles[new_row][new_col] is None):
-                
+
+            if (
+                0 <= new_row < self.grid_height
+                and 0 <= new_col < self.grid_width
+                and self.bubbles[new_row][new_col] is None
+            ):
+
                 # Calculate position in pixels
                 x = new_col * self.bubble_size
                 if new_row % 2 == 1:
-                    x += self.bubble_size / 2
+                    x += int(self.bubble_size / 2)
                 y = new_row * (self.bubble_size - 10)
-                
+
                 # Calculate distance to bubble's current position
                 dx = x - bubble.x
                 dy = y - bubble.y
                 distance = dx * dx + dy * dy  # No need for sqrt here
-                
+
                 if distance < min_distance:
                     min_distance = distance
                     best_position = (new_row, new_col)
 
-        return best_position 
+        return best_position

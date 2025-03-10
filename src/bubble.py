@@ -1,8 +1,10 @@
-import pygame
 import math
-from enum import Enum
 import random
+from enum import Enum
 from typing import Optional
+
+import pygame
+
 
 class BubbleColor(Enum):
     RED = (255, 50, 50)
@@ -12,18 +14,16 @@ class BubbleColor(Enum):
     PURPLE = (255, 50, 255)
     CYAN = (50, 255, 255)
 
+
 class BubbleState(Enum):
-    FIXED = "fixed"      # Bubble is fixed in the grid
+    FIXED = "fixed"  # Bubble is fixed in the grid
     FALLING = "falling"  # Bubble is falling (after group pop)
-    MOVING = "moving"    # Bubble is moving (shot from cannon)
+    MOVING = "moving"  # Bubble is moving (shot from cannon)
+
 
 class Bubble:
     def __init__(
-        self, 
-        x: float, 
-        y: float, 
-        color: Optional[BubbleColor] = None, 
-        size: int = 40
+        self, x: float, y: float, color: Optional[BubbleColor] = None, size: int = 40
     ) -> None:
         self.x = x
         self.y = y
@@ -31,7 +31,7 @@ class Bubble:
         self.color = color if color else random.choice(list(BubbleColor))
         self.state = BubbleState.FIXED
         self.velocity: list[float] = [0, 0]  # For moving bubbles [dx, dy]
-        
+
     def draw(self, screen: pygame.Surface) -> None:
         # Draw filled bubble
         points = self.calculate_hexagon()
@@ -48,10 +48,12 @@ class Bubble:
         for i in range(6):
             angle_deg = 60 * i - 30  # -30 to point hexagon upward
             angle_rad = math.pi / 180 * angle_deg
-            points.append((
-                self.x + radius * math.cos(angle_rad),
-                self.y + radius * math.sin(angle_rad)
-            ))
+            points.append(
+                (
+                    self.x + radius * math.cos(angle_rad),
+                    self.y + radius * math.sin(angle_rad),
+                )
+            )
         return points
 
     def update(self) -> None:
@@ -77,4 +79,7 @@ class Bubble:
     def start_falling(self) -> None:
         """Make the bubble start falling"""
         self.state = BubbleState.FALLING
-        self.velocity = [random.uniform(-2, 2), 0]  # Add slight random horizontal movement 
+        self.velocity = [
+            random.uniform(-2, 2),
+            0,
+        ]  # Add slight random horizontal movement
