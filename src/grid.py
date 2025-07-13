@@ -102,8 +102,15 @@ class Grid:
                 (0, -1),
             ]
             # Adjust for even/odd rows
-            if r % 2 == 0:
-                directions = [(-1, -1), (-1, 0), (0, 1), (1, -1), (1, 0), (0, -1)]
+            if row % 2 == 0:
+                directions = [
+                    (-1, -1),
+                    (-1, 0),
+                    (0, 1),
+                    (1, -1),
+                    (1, 0),
+                    (0, -1),
+                ]
 
             for dr, dc in directions:
                 flood_fill(r + dr, c + dc)
@@ -111,15 +118,19 @@ class Grid:
         flood_fill(row, col)
         return matches
 
-    def remove_matches(self, matches: set[tuple[int, int]]) -> None:
-        """Remove matched bubbles and handle floating bubbles"""
+    def remove_matches(self, matches: set[tuple[int, int]]) -> list[Bubble]:
+        """Remove matched bubbles and handle floating bubbles.
+        Returns list of falling bubbles."""
+        falling_bubbles: list[Bubble] = []
         if len(matches) >= 3:  # Only remove if 3 or more matches
             for row, col in matches:
                 self.bubbles[row][col] = None
-            self.handle_floating_bubbles()
+            falling_bubbles.extend(self.handle_floating_bubbles())
+        return falling_bubbles
 
-    def handle_floating_bubbles(self) -> None:
-        """Find and remove bubbles that are not connected to the top"""
+    def handle_floating_bubbles(self) -> list[Bubble]:
+        """Find and remove bubbles that are not connected to the top.
+        Returns list of falling bubbles."""
         # First, find all bubbles connected to the top row
         anchored: set[tuple[int, int]] = set()
 
@@ -144,7 +155,14 @@ class Grid:
             ]
             # Adjust for even/odd rows
             if row % 2 == 0:
-                directions = [(-1, -1), (-1, 0), (0, 1), (1, -1), (1, 0), (0, -1)]
+                directions = [
+                    (-1, -1),
+                    (-1, 0),
+                    (0, 1),
+                    (1, -1),
+                    (1, 0),
+                    (0, -1),
+                ]
 
             for dr, dc in directions:
                 flood_fill_anchored(row + dr, col + dc)
@@ -155,13 +173,16 @@ class Grid:
                 flood_fill_anchored(0, col)
 
         # Remove unanchored bubbles
+        falling_bubbles: list[Bubble] = []
         for row in range(self.grid_height):
             for col in range(self.grid_width):
                 if self.bubbles[row][col] and (row, col) not in anchored:
                     bubble = self.bubbles[row][col]
                     if bubble:
                         bubble.start_falling()
+                        falling_bubbles.append(bubble)
                     self.bubbles[row][col] = None
+        return falling_bubbles
 
     def update(self) -> None:
         """Update all bubbles in the grid"""

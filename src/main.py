@@ -87,7 +87,8 @@ class Game:
         """Check for matching bubbles after a collision"""
         grid_pos = self.grid.get_grid_pos(bubble.x, bubble.y)
         matches = self.grid.check_matches(grid_pos[0], grid_pos[1])
-        self.grid.remove_matches(matches)
+        falling = self.grid.remove_matches(matches)
+        self.falling_bubbles.extend(falling)
 
     def draw(self) -> None:
         """Draw game state"""
